@@ -1,0 +1,31 @@
+---
+- name: Ensure virtual environment directory exists for ansible-core
+  ansible.builtin.file:
+    path: "{{ venv_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Generate requirements.txt file with specified packages
+  ansible.builtin.copy:
+    dest: "{{ requirements_file }}"
+    content: |
+      {% for package in virtualenv_requirements %}
+      {{ package }}
+      {% endfor %}
+
+- name: Create virtual environment for ansible-core
+  ansible.builtin.pip:
+    chdir: "{{ venv_path }}"
+    requirements: "{{ requirements_file }}"
+    virtualenv: "{{ venv_path }}"
+    virtualenv_command: "python3 -m venv"
+    state: present
+  environment: "{{ proxy_env }}"
+
+- name: Install packages from requirements.txt in virtual environment
+  ansible.builtin.pip:
+    requirements: "{{ requirements_file }}"
+    virtualenv: "{{ venv_path }}"
+    virtualenv_command: "python3 -m venv"
+    umask: "0022"
+  environment: "{{ proxy_env }}"

@@ -1,0 +1,28 @@
+---
+
+- name: Install required system packages
+  ansible.builtin.dnf:
+    name: "{{ required_packages }}"
+    state: "{{ package_state }}"
+
+- name: Create Python virtual environment for vSphere SDK
+  shell:
+    cmd: umask 0022 ; python3 -m venv /opt/vsphere-automation-sdk-env
+    creates: /opt/vsphere-automation-sdk-env
+
+- name: Upgrade pip and setuptools in this virtual environment
+  ansible.builtin.pip:
+    name: "{{ virtualenv_sdk_packages }}"
+    state: latest
+    virtualenv: "{{ virtualenv_sdk_path }}"
+    umask: "0022"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  environment: "{{ proxy_env }}"
+
+- name: Install vSphere Automation SDK from Github
+  ansible.builtin.pip:
+    name: "{{ vsphere_sdk_url }}"
+    virtualenv: "{{ virtualenv_sdk_path }}"
+    umask: "0022"
+  environment: "{{ proxy_env }}"

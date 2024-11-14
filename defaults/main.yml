@@ -1,0 +1,47 @@
+---
+# defaults file for control-node-setup
+
+required_packages:
+  - python3
+  - git
+  - sshpass
+
+package_state: present
+
+# Packages for SDK in virtual environment
+virtualenv_sdk_packages:
+  - pip
+  - setuptools
+  - pynetbox
+  - netaddr
+  - requests
+  - PyVmomi
+  - pynetbox
+
+# Python packages with specific versions for the virtual environment
+virtualenv_requirements:
+  - pynetbox
+  - pytz
+  - netaddr
+  - ansible
+
+
+virtualenv_sdk_path: /opt/vsphere-automation-sdk-env
+
+# vSphere SDK GitHub URL
+vsphere_sdk_url: git+https://github.com/vmware/vsphere-automation-sdk-python.git
+
+# Virtual environment path
+venv_path: /opt/venv_ansible
+
+# Requirements file location
+requirements_file: /opt/venv_ansible/requirements.txt
+
+# Home directory for srv-ansible user
+srv_ansible_home: "/home/srv-ansible"
+
+# store environment settings for reuse in multiple playbooks by defining them in anywhere.
+proxy_env:
+  http_proxy: "{{ hostvars[inventory_hostname]['sites_' + datacenter_location].http_proxy }}"
+  https_proxy: "{{ hostvars[inventory_hostname]['sites_' + datacenter_location].https_proxy }}"
+  no_proxy: "{{ hostvars[inventory_hostname]['sites_' + datacenter_location].no_proxy }}"

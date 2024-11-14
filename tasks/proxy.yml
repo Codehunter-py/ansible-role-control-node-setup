@@ -1,0 +1,12 @@
+---
+- name: Ensure proxy settings are added to .bashrc for service user
+  ansible.builtin.lineinfile:
+    path: "{{ srv_ansible_home }}/.bashrc"
+    line: |
+      export HTTP_PROXY="{{ proxy_env.http_proxy }}"
+      export HTTPS_PROXY="{{ proxy_env.https_proxy }}"
+      export NO_PROXY="{{ proxy_env.no_proxy }}"
+    state: present
+    insertafter: EOF
+  become: true
+  become_user: srv-ansible

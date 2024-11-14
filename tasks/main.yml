@@ -1,0 +1,22 @@
+---
+# tasks file for control-node-setup
+
+- import_tasks: proxy.yml
+
+- name: Ensure that vSphere Automation python client library is installed.
+  import_tasks: install_venv_for_python_sdk.yml
+
+- name: Ensure that Virtual Environment is enabled for ansible-playbooks.
+  import_tasks: install_venv_for_ansible_core.yml
+
+- name: Ensure venv_path and virtualenv_sdk_path directories exist with correct ownership
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: srv-ansible
+    group: srv-ansible
+    mode: '0755'
+    recurse: yes
+  loop:
+    - "{{ virtualenv_sdk_path }}"
+    - "{{ venv_path }}"
