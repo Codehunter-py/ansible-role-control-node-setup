@@ -22,7 +22,7 @@ The following variables are configurable within your playbook or inventory to cu
 | `vsphere_sdk_url`           | URL for the vSphere SDK package.                                                                 | `git+https://github.com/vmware/vsphere-automation-sdk-python.git` |
 | `venv_path`                 | Path for the Ansible-Core virtual environment.                                                   | `/opt/venv_ansible`                                          |
 | `requirements_file`         | Path for the `requirements.txt` file.                                                            | `/opt/venv_ansible/requirements.txt`                         |
-| `srv_ansible_home`          | Home directory for the `srv-ansible` user.                                                       | `/home/srv-ansible`                                          |
+| `srv_ansible_home`          | Home directory for the `ansible` user.                                                           | `/home/ansible`                                              |
 | `proxy_env`                 | Proxy settings to be configured in `.bashrc` for the service user.                               | `{http_proxy, https_proxy, no_proxy}`                        |
 | `service_user`              | The service account name to be configured.                                                       | `ansible`                                                    |
 | `git_repo_url`              | URL of the Git repository to clone and sync.                                                     | `git@github.com:example/automation.git`                      |
