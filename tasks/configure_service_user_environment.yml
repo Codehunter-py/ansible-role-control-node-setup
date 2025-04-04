@@ -1,0 +1,33 @@
+---
+- name: Ensure proxy settings are added to .bashrc for service user
+  ansible.builtin.blockinfile:
+    path: "{{ srv_ansible_home }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - PROXY SETTINGS"
+    block: |
+      export HTTP_PROXY="{{ proxy_env.http_proxy }}"
+      export HTTPS_PROXY="{{ proxy_env.https_proxy }}"
+      export NO_PROXY="{{ proxy_env.no_proxy }}"
+    state: present
+    create: true
+  become: true
+  become_user: "{{ service_user }}"
+
+- name: Ensure REQUESTS_CA_BUNDLE settings are added to .bashrc for service user
+  ansible.builtin.lineinfile:
+    path: "{{ srv_ansible_home }}/.bashrc"
+    line: "export REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem"
+    regexp: "^export REQUESTS_CA_BUNDLE="
+    state: present
+    create: true
+  become: true
+  become_user: "{{ service_user }}"
+
+- name: Ensure venv_ansible settings are added to .bashrc for service user
+  ansible.builtin.lineinfile:
+    path: "{{ srv_ansible_home }}/.bashrc"
+    line: "source /opt/venv_ansible/bin/activate"
+    regexp: "^source /opt/venv_ansible/bin/activate"
+    state: present
+    create: true
+  become: true
+  become_user: "{{ service_user }}"

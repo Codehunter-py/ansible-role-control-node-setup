@@ -1,7 +1,8 @@
 ---
 # tasks file for control-node-setup
 
-- import_tasks: proxy.yml
+- import_tasks: configure_service_user_environment.yml
+  tags: configure
 
 - name: Ensure that vSphere Automation python client library is installed.
   import_tasks: install_venv_for_python_sdk.yml
@@ -13,10 +14,13 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: srv-ansible
-    group: srv-ansible
+    owner: "{{ service_user }}"
+    group: "{{ service_user }}"
     mode: '0755'
     recurse: yes
   loop:
     - "{{ virtualenv_sdk_path }}"
     - "{{ venv_path }}"
+
+- import_tasks: git_sync_cronjob.yml
+  tags: cron

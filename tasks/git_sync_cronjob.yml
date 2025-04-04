@@ -1,0 +1,47 @@
+---
+- name: Check if git repository path exists
+  ansible.builtin.stat:
+    path: "{{ git_repo_path }}"
+  register: git_repo_stat
+  become: true
+  become_user: "{{ service_user }}"
+
+- name: Clone git repository if not present
+  ansible.builtin.git:
+    repo: "{{ git_repo_url }}"
+    dest: "{{ git_repo_path }}"
+    version: "develop"
+    force: yes
+  when: not git_repo_stat.stat.exists
+  become: true
+  become_user: "{{ service_user }}"
+  register: git_clone_result
+  ignore_errors: true
+
+- name: Warn if cloning failed
+  ansible.builtin.debug:
+    msg: "⚠️ Git repository could not be cloned. Possible cause: access rights issue (e.g., SSH key missing or wrong repo URL)."
+  when:
+    - not git_repo_stat.stat.exists
+    - git_clone_result is failed
+
+- name: Ensure service user is allowed to use cron
+  ansible.builtin.lineinfile:
+    path: /etc/cron.allow
+    line: "{{ service_user }}"
+    state: present
+    create: yes
+  become: true
+  tags: cron
+
+- name: Create cron job to update git repository every hour
+  ansible.builtin.cron:
+    name: "Sync git repository develop branch"
+    minute: "0"
+    hour: "*"
+    job: "cd {{ git_repo_path }} && git checkout develop && git fetch && git reset --hard origin/develop && git clean -fd && git pull origin develop"
+    user: "{{ service_user }}"
+    state: "{{ git_cron_state }}"
+  become: true
+  become_user: "{{ service_user }}"
+  when: git_repo_stat.stat.exists or git_clone_result is succeeded

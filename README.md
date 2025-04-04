@@ -1,6 +1,6 @@
 # Ansible Role: Control Node Setup
 
-This Ansible role sets up a control node with Python virtual environments for both vSphere Automation SDK and Ansible-Core. It installs necessary system packages, sets up Python virtual environments, configures proxies, and ensures correct permissions.
+This Ansible role sets up a control node with Python virtual environments for both vSphere Automation SDK and Ansible-Core. It installs necessary system packages, sets up Python virtual environments, configures proxies, and ensures correct permissions. It also adds Git repository sync as a cron job and prepares the shell environment for the `ansible` service user.
 
 ## Requirements
 
@@ -24,6 +24,10 @@ The following variables are configurable within your playbook or inventory to cu
 | `requirements_file`         | Path for the `requirements.txt` file.                                                            | `/opt/venv_ansible/requirements.txt`                         |
 | `srv_ansible_home`          | Home directory for the `srv-ansible` user.                                                       | `/home/srv-ansible`                                          |
 | `proxy_env`                 | Proxy settings to be configured in `.bashrc` for the service user.                               | `{http_proxy, https_proxy, no_proxy}`                        |
+| `service_user`              | The service account name to be configured.                                                       | `ansible`                                                    |
+| `git_repo_url`              | URL of the Git repository to clone and sync.                                                     | `git@github.com:example/automation.git`                      |
+| `git_repo_path`             | Destination path where the Git repo will be cloned.                                              | `/opt/ansible-projects`                                      |
+| `git_cron_state`            | Whether the Git sync cronjob should be `present` or `absent`.                                    | `present`                                                    |
 
 ## Usage Example
 
@@ -39,6 +43,7 @@ Include this role in your playbook and set the required variables:
   roles:
     - role: ansible-control
       vars:
+        service_user: ansible
         required_packages:
           - python3
           - git
@@ -56,8 +61,10 @@ Include this role in your playbook and set the required variables:
           http_proxy: "http://proxy.example.com:8080"
           https_proxy: "http://proxy.example.com:8080"
           no_proxy: "localhost,127.0.0.1"
+        git_repo_url: "git@github.com:example/automation.git"
+        git_repo_path: "/opt/ansible-projects"
+        git_cron_state: "present"
 ```
-
 ### Role Tasks
 
 - System Package Installation: Installs the required system packages using dnf.
@@ -65,6 +72,16 @@ Include this role in your playbook and set the required variables:
 - vSphere SDK Virtual Environment Setup: Creates and configures a Python virtual environment for the vSphere SDK.
 - Ansible-Core Virtual Environment Setup: Creates and configures a Python virtual environment for Ansible-Core, including a requirements.txt file for specified packages.
 - Permissions Management: Ensures that both virtual environment directories have the correct ownership and permissions.
+- Service User Shell Configuration: Adds the following to .bashrc of the service user: 
+  - Proxy environment variables
+  - REQUESTS_CA_BUNDLE setting
+  - Activation line for ansible-core virtualenv
+- Git Repository Sync & Cron Setup:
+  - Clones the specified Git repository if not already present.
+  - Creates a cron job (hourly) to:
+  - Checkout and reset the develop branch
+  - Pull latest changes and clean up untracked files
+  - Ensures the service user is allowed to use cron via /etc/cron.allow.
 
 Author Information
 ------------------
